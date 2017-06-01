@@ -45,10 +45,10 @@ You can also pass a PSR-2-compatible object to the options object:
 $options->setLogger($logger)
 ```
 
-In PHP 5.6 >= If you want to disable peer verification over SSL you should set 
+In `PHP 5.6 >=` If you want to disable peer verification over SSL you should set 
 
 ```php
-$options->->setPeerVerification(false)
+$options->setPeerVerification(false)
 ```
 
 The client manages the connection to the Jabber server and requires the options object:
