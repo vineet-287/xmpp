@@ -89,7 +89,7 @@ XML;
      */
     public static function factory(Options $options)
     {
-        $socket = new SocketClient($options->getAddress(), $options->getContextOptions());
+        $socket = new SocketClient($options->getAddress(), $options->getPeerVerification());
         $object = new static($socket);
         $object->setOptions($options);
         return $object;

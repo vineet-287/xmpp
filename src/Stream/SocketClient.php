@@ -44,8 +44,7 @@ use Fabiang\Xmpp\Util\ErrorHandler;
  *
  * @package Xmpp\Stream
  */
-class SocketClient
-{
+class SocketClient {
 
     const BUFFER_LENGTH = 4096;
 
@@ -63,58 +62,61 @@ class SocketClient
      */
     protected $address;
 
-
     /**
-     * Options used to create a stream context
-     * @see http://php.net/manual/en/function.stream-context-create.php
+     * Context to set peer verification.
      *
      * @var array
      */
-    protected $options;
+    protected $context = null;
 
     /**
      * Constructor takes address as argument.
      *
      * @param string $address
      */
-    public function __construct($address, $options = null)
-    {
+    public function __construct($address, $isPeerVerify) {
         $this->address = $address;
-        $this->options = $options;
+
+        //Peer verification set to false.
+        if (!$isPeerVerify) {
+            $context = stream_context_create();
+            $result = stream_context_set_option($context, 'ssl', 'verify_peer', false);
+            $result = stream_context_set_option($context, 'ssl', 'verify_peer_name', false);
+            $result = stream_context_set_option($context, 'ssl', 'allow_self_signed', true);
+            $this->context = $context;
+        }
     }
 
     /**
      * Connect.
      *
-     * @param integer $timeout Timeout for connection
+     * @param integer $timeout    Timeout for connection
      * @param boolean $persistent Persitent connection
      * @return void
      */
-    public function connect($timeout = 30, $persistent = false)
-    {
-        $flags = STREAM_CLIENT_CONNECT;
-
+    public function connect($timeout = 30, $persistent = false) {
         if (true === $persistent) {
-            $flags |= STREAM_CLIENT_PERSISTENT;
+            $flags = STREAM_CLIENT_CONNECT | STREAM_CLIENT_PERSISTENT;
+        } else {
+            $flags = STREAM_CLIENT_CONNECT;
         }
 
-        // call stream_socket_client with custom error handler enabled
-        $handler = new ErrorHandler(
-            function ($address, $timeout, $flags, array $options = null) {
-                $errno  = null;
-                $errstr = null;
-
-                if (!empty($options)) {
-                    $context = stream_context_create($options);
-                    return stream_socket_client($address, $errno, $errstr, $timeout, $flags, $context);
-                }
+        //Check whether peer verification false
+        if (!is_null($this->context)) {
+            //call stream_socket_client with custom error handler enabled
+            $handler = new ErrorHandler(
+                    function ($address, $timeout, $flags) {
+                return stream_socket_client($address, $errno, $errstr, $timeout, $flags, $this->context);
+            }, $this->address, $timeout, $flags
+            );
+        } else {
+            //call stream_socket_client with custom error handler enabled
+            $handler = new ErrorHandler(
+                    function ($address, $timeout, $flags) {
                 return stream_socket_client($address, $errno, $errstr, $timeout, $flags);
-            },
-            $this->address,
-            $timeout,
-            $flags,
-            $this->options
-        );
+            }, $this->address, $timeout, $flags
+            );
+        }
         $resource = $handler->execute(__FILE__, __LINE__);
 
         stream_set_timeout($resource, $timeout);
@@ -124,12 +126,11 @@ class SocketClient
     /**
      * Reconnect and optionally use different address.
      *
-     * @param string $address
+     * @param string  $address
      * @param integer $timeout
-     * @param bool $persistent
+     * @param bool    $persistent
      */
-    public function reconnect($address = null, $timeout = 30, $persistent = false)
-    {
+    public function reconnect($address = null, $timeout = 30, $persistent = false) {
         $this->close();
 
         if (null !== $this->address) {
@@ -144,8 +145,7 @@ class SocketClient
      *
      * @return void
      */
-    public function close()
-    {
+    public function close() {
         fclose($this->resource);
     }
 
@@ -155,9 +155,8 @@ class SocketClient
      * @param boolean $flag Flag
      * @return $this
      */
-    public function setBlocking($flag = true)
-    {
-        stream_set_blocking($this->resource, (int)$flag);
+    public function setBlocking($flag = true) {
+        stream_set_blocking($this->resource, (int) $flag);
         return $this;
     }
 
@@ -167,20 +166,18 @@ class SocketClient
      * @param integer $length Bytes to read
      * @return string
      */
-    public function read($length = self::BUFFER_LENGTH)
-    {
+    public function read($length = self::BUFFER_LENGTH) {
         return fread($this->resource, $length);
     }
 
     /**
      * Write to stream.
      *
-     * @param string $string String
+     * @param string  $string String
      * @param integer $length Limit
      * @return void
      */
-    public function write($string, $length = null)
-    {
+    public function write($string, $length = null) {
         if (null !== $length) {
             fwrite($this->resource, $string, $length);
         } else {
@@ -191,13 +188,12 @@ class SocketClient
     /**
      * Enable/disable cryptography on stream.
      *
-     * @param boolean $enable Flag
+     * @param boolean $enable     Flag
      * @param integer $cryptoType One of the STREAM_CRYPTO_METHOD_* constants.
      * @return void
      * @throws InvalidArgumentException
      */
-    public function crypto($enable, $cryptoType = null)
-    {
+    public function crypto($enable, $cryptoType = null) {
         if (false === $enable) {
             $handler = new ErrorHandler('stream_socket_enable_crypto', $this->resource, false);
             return $handler->execute(__FILE__, __LINE__);
@@ -215,8 +211,7 @@ class SocketClient
      *
      * @return resource
      */
-    public function getResource()
-    {
+    public function getResource() {
         return $this->resource;
     }
 
@@ -225,8 +220,8 @@ class SocketClient
      *
      * @return string
      */
-    public function getAddress()
-    {
+    public function getAddress() {
         return $this->address;
     }
+
 }

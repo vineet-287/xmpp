@@ -46,8 +46,7 @@ use Psr\Log\LoggerInterface;
  *
  * @package Xmpp
  */
-class Options
-{
+class Options {
 
     /**
      *
@@ -95,6 +94,12 @@ class Options
 
     /**
      *
+     * @var boolean
+     */
+    protected $isPeerVerify;
+
+    /**
+     *
      * @var string
      */
     protected $jid;
@@ -131,10 +136,9 @@ class Options
      */
     protected $authenticationClasses = [
         'digest-md5' => '\\Fabiang\\Xmpp\\EventListener\\Stream\\Authentication\\DigestMd5',
-        'plain'      => '\\Fabiang\\Xmpp\\EventListener\\Stream\\Authentication\\Plain',
-        'anonymous'  => '\\Fabiang\\Xmpp\\EventListener\\Stream\\Authentication\\Anonymous'
+        'plain' => '\\Fabiang\\Xmpp\\EventListener\\Stream\\Authentication\\Plain',
+        'anonymous' => '\\Fabiang\\Xmpp\\EventListener\\Stream\\Authentication\\Anonymous'
     ];
-
 
     /**
      * Options used to create a stream context
@@ -143,14 +147,12 @@ class Options
      */
     protected $contextOptions = [];
 
-
     /**
      * Constructor.
      *
      * @param string $address Server address
      */
-    public function __construct($address = null)
-    {
+    public function __construct($address = null) {
         if (null !== $address) {
             $this->setAddress($address);
         }
@@ -161,8 +163,7 @@ class Options
      *
      * @return ImplementationInterface
      */
-    public function getImplementation()
-    {
+    public function getImplementation() {
         if (null === $this->implementation) {
             $this->setImplementation(new DefaultImplementation());
         }
@@ -176,8 +177,7 @@ class Options
      * @param ImplementationInterface $implementation
      * @return $this
      */
-    public function setImplementation(ImplementationInterface $implementation)
-    {
+    public function setImplementation(ImplementationInterface $implementation) {
         $this->implementation = $implementation;
         return $this;
     }
@@ -187,8 +187,7 @@ class Options
      *
      * @return string
      */
-    public function getAddress()
-    {
+    public function getAddress() {
         return $this->address;
     }
 
@@ -200,8 +199,7 @@ class Options
      * @param string $address Server address
      * @return $this
      */
-    public function setAddress($address)
-    {
+    public function setAddress($address) {
         $this->address = (string) $address;
         if (false !== ($host = parse_url($address, PHP_URL_HOST))) {
             $this->setTo($host);
@@ -214,8 +212,7 @@ class Options
      *
      * @return ConnectionInterface
      */
-    public function getConnection()
-    {
+    public function getConnection() {
         return $this->connection;
     }
 
@@ -225,8 +222,7 @@ class Options
      * @param ConnectionInterface $connection
      * @return $this
      */
-    public function setConnection(ConnectionInterface $connection)
-    {
+    public function setConnection(ConnectionInterface $connection) {
         $this->connection = $connection;
         return $this;
     }
@@ -236,8 +232,7 @@ class Options
      *
      * @return LoggerInterface
      */
-    public function getLogger()
-    {
+    public function getLogger() {
         return $this->logger;
     }
 
@@ -247,8 +242,7 @@ class Options
      * @param \Psr\Log\LoggerInterface $logger PSR-3 Logger
      * @return $this
      */
-    public function setLogger(LoggerInterface $logger)
-    {
+    public function setLogger(LoggerInterface $logger) {
         $this->logger = $logger;
         return $this;
     }
@@ -258,8 +252,7 @@ class Options
      *
      * @return string
      */
-    public function getTo()
-    {
+    public function getTo() {
         return $this->to;
     }
 
@@ -271,8 +264,7 @@ class Options
      * @param string $to
      * @return $this
      */
-    public function setTo($to)
-    {
+    public function setTo($to) {
         $this->to = (string) $to;
         return $this;
     }
@@ -282,8 +274,7 @@ class Options
      *
      * @return string
      */
-    public function getUsername()
-    {
+    public function getUsername() {
         return $this->username;
     }
 
@@ -293,8 +284,7 @@ class Options
      * @param string $username
      * @return $this
      */
-    public function setUsername($username)
-    {
+    public function setUsername($username) {
         $this->username = (string) $username;
         return $this;
     }
@@ -304,8 +294,7 @@ class Options
      *
      * @return string
      */
-    public function getResource()
-    {
+    public function getResource() {
         $username = $this->getUsername();
         $username = explode('/', $username);
         return isset($username[1]) ? $username[1] : '';
@@ -316,8 +305,7 @@ class Options
      *
      * @return string
      */
-    public function getPassword()
-    {
+    public function getPassword() {
         return $this->password;
     }
 
@@ -327,9 +315,28 @@ class Options
      * @param string $password
      * @return $this
      */
-    public function setPassword($password)
-    {
+    public function setPassword($password) {
         $this->password = (string) $password;
+        return $this;
+    }
+
+    /**
+     * Get peer verification value.
+     *
+     * @return string
+     */
+    public function getPeerVerification() {
+        return $this->isPeerVerify;
+    }
+
+    /**
+     * Set  peer verification value.
+     *
+     * @param boolean $peerVerification
+     * @return $this
+     */
+    public function setPeerVerification($peerVerification) {
+        $this->isPeerVerify = $peerVerification;
         return $this;
     }
 
@@ -338,8 +345,7 @@ class Options
      *
      * @return string
      */
-    public function getJid()
-    {
+    public function getJid() {
         return $this->jid;
     }
 
@@ -349,8 +355,7 @@ class Options
      * @param string $jid
      * @return $this
      */
-    public function setJid($jid)
-    {
+    public function setJid($jid) {
         $this->jid = (string) $jid;
         return $this;
     }
@@ -360,8 +365,7 @@ class Options
      *
      * @return string
      */
-    public function getSid()
-    {
+    public function getSid() {
         return $this->sid;
     }
 
@@ -371,8 +375,7 @@ class Options
      * @param string $jid
      * @return $this
      */
-    public function setSid($sid)
-    {
+    public function setSid($sid) {
         $this->sid = (string) $sid;
         return $this;
     }
@@ -382,8 +385,7 @@ class Options
      *
      * @return boolean
      */
-    public function isAuthenticated()
-    {
+    public function isAuthenticated() {
         return $this->authenticated;
     }
 
@@ -393,8 +395,7 @@ class Options
      * @param boolean $authenticated Flag
      * @return $this
      */
-    public function setAuthenticated($authenticated)
-    {
+    public function setAuthenticated($authenticated) {
         $this->authenticated = (bool) $authenticated;
         return $this;
     }
@@ -404,8 +405,7 @@ class Options
      *
      * @return Protocol\User\User[]
      */
-    public function getUsers()
-    {
+    public function getUsers() {
         return $this->users;
     }
 
@@ -415,8 +415,7 @@ class Options
      * @param array $users User list
      * @return $this
      */
-    public function setUsers(array $users)
-    {
+    public function setUsers(array $users) {
         $this->users = $users;
         return $this;
     }
@@ -426,8 +425,7 @@ class Options
      *
      * @return array
      */
-    public function getAuthenticationClasses()
-    {
+    public function getAuthenticationClasses() {
         return $this->authenticationClasses;
     }
 
@@ -436,8 +434,7 @@ class Options
      * @param array $authenticationClasses Authentication classes
      * @return $this
      */
-    public function setAuthenticationClasses(array $authenticationClasses)
-    {
+    public function setAuthenticationClasses(array $authenticationClasses) {
         $this->authenticationClasses = $authenticationClasses;
         return $this;
     }
@@ -447,8 +444,7 @@ class Options
      *
      * @return integer
      */
-    public function getTimeout()
-    {
+    public function getTimeout() {
         return $this->timeout;
     }
 
@@ -458,8 +454,7 @@ class Options
      * @param integer $timeout Seconds
      * @return \Fabiang\Xmpp\Options
      */
-    public function setTimeout($timeout)
-    {
+    public function setTimeout($timeout) {
         $this->timeout = (int) $timeout;
         return $this;
     }
@@ -469,8 +464,7 @@ class Options
      *
      * @return array
      */
-    public function getContextOptions()
-    {
+    public function getContextOptions() {
         return $this->contextOptions;
     }
 
@@ -480,9 +474,9 @@ class Options
      * @param array $contextOptions
      * @return \Fabiang\Xmpp\Options
      */
-    public function setContextOptions($contextOptions)
-    {
+    public function setContextOptions($contextOptions) {
         $this->contextOptions = (array) $contextOptions;
         return $this;
     }
+
 }
